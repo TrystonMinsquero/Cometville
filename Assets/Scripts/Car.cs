@@ -11,7 +11,7 @@ struct FrameInputs
 }
 
 [RequireComponent(typeof(CarController))]
-public class Car : Player
+public class Car : MonoBehaviour
 {
 
     public Rigidbody rb;
