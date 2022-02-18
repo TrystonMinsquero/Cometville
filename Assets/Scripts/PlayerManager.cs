@@ -98,28 +98,19 @@ public class PlayerManager : MonoBehaviour
             Destroy(player.gameObject);
             return;
         }
-
-        if (LobbyManager.canJoinLeave)
-        {
-            if(playerCount < players.Length)
-                AddPlayer(player);
-            else
-            {
-                Destroy(player.gameObject);
-                return;
-            }
-        }
+        
+        AddPlayer(player);
 
     }
     
     //Properly adds a player to the game
     private static void AddPlayer(Player player, bool inGame = false)
     {
-
-        players[NextPlayerSlot()] = player;
+        int playerIndex = NextPlayerSlot();
+        players[playerIndex] = player;
         playerCount++;
 
-        player.name = "Player " + (NextPlayerSlot() + 1);
+        player.name = "Player " + (playerIndex + 1);
         player.transform.parent = instance.transform;
 
         if (inGame)
@@ -132,7 +123,7 @@ public class PlayerManager : MonoBehaviour
     private static void RemovePlayer(Player player)
     {
             
-        if (LobbyManager.canJoinLeave)
+        if (LobbyManager.CanJoinLeave)
         {
             int playerIndex = GetIndex(player);
             if (playerIndex >= 0)

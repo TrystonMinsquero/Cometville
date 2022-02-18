@@ -5,7 +5,12 @@ public class LobbyManager : MonoBehaviour
 {
     //static variables
     public static LobbyManager instance;
-    public static bool canJoinLeave; //true if in lobby menu (not controls, etc.)
+
+    public static bool CanJoinLeave
+    {
+        get { return instance; }
+    }
+    //true if in lobby menu (not controls, etc.)
 
     private void Awake()
     {
@@ -13,9 +18,12 @@ public class LobbyManager : MonoBehaviour
             instance = this;
         else
             Destroy(this.gameObject);
-
-        canJoinLeave = true;
         //MusicManager.StartMusic();
+    }
+
+    public void StartGame()
+    {
+        SceneManager.LoadScene("TestCar");
     }
 
 }

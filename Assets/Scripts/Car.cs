@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
@@ -12,9 +10,9 @@ struct FrameInputs
     public Vector3 direction;
 }
 
-public class Car : MonoBehaviour
+[RequireComponent(typeof(CarController))]
+public class Car : Player
 {
-    private Controls controls;
 
     public Rigidbody rb;
     public Transform cam;
@@ -35,36 +33,30 @@ public class Car : MonoBehaviour
 
     public Text speedText;
 
-    void Awake()
-    {
-        controls = new Controls();
-    }
+    private CarController _controller;
 
-    void OnEnable()
-    {
-        controls.Enable();
-    }
-
-    void OnDisable()
-    {
-        controls.Disable();
-    }
+  
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        _controller = GetComponent<CarController>();
     }
 
     void FixedUpdate()
     {
         var add = Quaternion.Euler(0, rotation.y, 0) * inputs.direction;
-        rb.velocity = Vector3.MoveTowards(rb.velocity, Vector3.ClampMagnitude(rb.velocity + add * Time.fixedDeltaTime * acceleration, maxSpeed), acceleration * Time.fixedDeltaTime * accelCurve.Evaluate(rb.velocity.magnitude / maxSpeed));
+        rb.velocity = Vector3.MoveTowards(rb.velocity, 
+            Vector3.ClampMagnitude(
+                rb.velocity + add * Time.fixedDeltaTime * acceleration, maxSpeed), 
+            acceleration * Time.fixedDeltaTime * accelCurve.Evaluate(rb.velocity.magnitude / maxSpeed));
         rb.AddForce(gravity * Vector3.down * Time.fixedDeltaTime);
         rb.velocity = Vector3.MoveTowards(rb.velocity, Vector3.zero,
             rb.velocity.magnitude * friction * Time.fixedDeltaTime);
 
-        speedText.text = $"Speed: {rb.velocity.magnitude:00.0} mph";
+        if(speedText)
+            speedText.text = $"Speed: {rb.velocity.magnitude:00.0} mph";
     }
 
     #region Input Handling
@@ -72,7 +64,7 @@ public class Car : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var d = controls.Gameplay.Movement.ReadValue<Vector2>();
+        var d = _controller.MoveInput;
         var dir = new Vector3(d.x, 0, d.y);
         dir.Normalize();
         inputs.direction = dir;
@@ -90,7 +82,6 @@ public class Car : MonoBehaviour
 
     void OnCollisionStay(Collision c)
     {
-        Debug.Log(c);
         if (c.transform.CompareTag("Floor"))
         {
             foreach (var v in c.contacts)
